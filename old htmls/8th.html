@@ -1,0 +1,624 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Dynamic Decision Wheel</title>
+  <!-- Poppins for clean modern look -->
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&display=swap" rel="stylesheet">
+  <style>
+    * { box-sizing: border-box; }
+    body {
+      margin: 0; padding: 20px;
+      background: #F5F2E9; /* Light peach/beige background */
+      font-family: 'Poppins', sans-serif;
+      display: flex; flex-direction: column; align-items: center; justify-content: center;
+      min-height: 100vh; color: #1A1A2E; /* Dark blue/black text */
+      text-align: center;
+    }
+    
+    /* Main card container */
+    .card {
+      background: #FFFFFF;
+      border-radius: 12px;
+      box-shadow: 12px 12px 0px #1A1A2E; /* Wider dark blue/black shadow */
+      padding: 32px;
+      max-width: 750px;
+      width: 100%;
+      margin: 20px;
+      position: relative;
+    }
+    
+    .title { 
+      font-size: 28px; 
+      font-weight: 700; 
+      margin-bottom: 8px; 
+      color: #1A1A2E;
+      text-align: left;
+    }
+    .subtitle { 
+      font-size: 16px; 
+      color: #1A1A2E;
+      opacity: 0.8; 
+      margin-bottom: 24px; 
+      text-align: left;
+    }
+    
+    /* Divider line */
+    .divider {
+      height: 2px;
+      background: #1A1A2E;
+      margin: 24px 0;
+    }
+    
+    .controls { 
+      display: flex; 
+      flex-wrap: wrap; 
+      gap: 12px; 
+      align-items: center; 
+      justify-content: flex-start; 
+      margin-bottom: 24px; 
+    }
+    .input-group { display: flex; gap: 6px; }
+    input[type="text"] {
+      padding: 12px 16px; 
+      border: 2px solid #1A1A2E; 
+      border-radius: 8px;
+      font-size: 15px; 
+      min-width: 220px;
+      background: #FFFFFF; 
+      color: #1A1A2E;
+      transition: box-shadow 0.2s;
+      font-family: 'Poppins', sans-serif;
+      box-shadow: 4px 4px 0px #1A1A2E;
+    }
+    input[type="text"]:focus { 
+      outline: none;
+      box-shadow: 0 0 0 3px rgba(26, 26, 46, 0.1), 4px 4px 0px #1A1A2E; 
+    }
+    .btn {
+      padding: 12px 20px; 
+      border: 2px solid #1A1A2E; 
+      border-radius: 8px;
+      font-size: 15px; 
+      font-weight: 600; 
+      cursor: pointer;
+      background: #4ECDC4; 
+      color: #1A1A2E;
+      transition: all 0.3s;
+      font-family: 'Poppins', sans-serif;
+      box-shadow: 4px 4px 0px #1A1A2E;
+    }
+    .btn-clear { 
+      background: #FFEAA7; 
+      color: #1A1A2E;
+      box-shadow: 4px 4px 0px #1A1A2E;
+    }
+    .btn:hover { 
+      transform: translateY(-2px);
+      box-shadow: 6px 6px 0px #1A1A2E;
+    }
+    .tasks-list { 
+      display: flex; 
+      flex-wrap: wrap; 
+      gap: 10px; 
+      justify-content: flex-start; 
+      margin-bottom: 90px; 
+    }
+    .task-item {
+      background: #FFFFFF; 
+      padding: 8px 14px; 
+      border-radius: 8px;
+      font-size: 13px; 
+      display: flex; 
+      align-items: center; 
+      gap: 6px;
+      border: 2px solid #1A1A2E;
+      color: #1A1A2E;
+      box-shadow: 4px 4px 0px #1A1A2E;
+    }
+    .task-delete { 
+      background: none; 
+      border: none; 
+      font-size: 16px; 
+      cursor: pointer; 
+      color: #1A1A2E; 
+      transition: color 0.2s; 
+    }
+    .task-delete:hover { color: #FF6B6B; }
+    .wheel-container { 
+      position: relative; 
+      margin: 24px auto; 
+      display: flex; 
+      justify-content: center; 
+      align-items: center;
+    }
+    .wheel {
+      width: 420px; 
+      height: 420px; 
+      border-radius: 50%;
+      border: 3px solid #1A1A2E; 
+      box-shadow: 0 4px 20px rgba(26, 26, 46, 0.3);
+      transition: transform 3s cubic-bezier(0.23,1,0.32,1);
+      background: #CCC;
+      position: relative;
+    }
+    .segment-text {
+      position: absolute; 
+      color: #FFFFFF; 
+      font-weight: 600; 
+      font-size: 11px;
+      text-shadow: 2px 2px 4px rgba(0,0,0,0.7); 
+      pointer-events: none;
+      max-width: 60px; 
+      text-align: center; 
+      line-height: 1.1;
+      word-wrap: break-word; 
+      hyphens: auto;
+      transform-origin: center;
+    }
+    .center-dot {
+      position: absolute; 
+      top: 50%; 
+      left: 50%; 
+      width: 44px; 
+      height: 44px;
+      background: #FFFFFF; 
+      border-radius: 50%; 
+      transform: translate(-50%,-50%);
+      display: flex; 
+      align-items: center; 
+      justify-content: center;
+      font-size: 20px; 
+      color: #1A1A2E; 
+      z-index: 10;
+      border: 2px solid #1A1A2E;
+    }
+    .pointer {
+      position: absolute; 
+      top: -18px; 
+      left: 50%; 
+      transform: translateX(-50%);
+      border-left: 14px solid transparent; 
+      border-right: 14px solid transparent;
+      border-top: 28px solid #1A1A2E; 
+      filter: drop-shadow(0 4px 8px rgba(26, 26, 46, 0.2)); 
+      z-index: 5;
+    }
+    .spin-button {
+      padding: 16px 32px; 
+      border: 2px solid #1A1A2E; 
+      border-radius: 8px;
+      font-size: 18px; 
+      font-weight: 700; 
+      cursor: pointer;
+      background: #FF6B9D; 
+      color: #FFFFFF;
+      transition: all 0.3s; 
+      margin: 32px 0;
+      font-family: 'Poppins', sans-serif;
+      box-shadow: 4px 4px 0px #1A1A2E;
+    }
+    .spin-button:disabled { opacity: 0.6; cursor: not-allowed; }
+    .spin-button:hover:not(:disabled) { 
+      transform: translateY(-3px);
+      box-shadow: 6px 6px 0px #1A1A2E;
+    }
+    .result {
+      font-size: 24px; 
+      font-weight: 400; 
+      min-height: 64px;
+      display: flex; 
+      align-items: center; 
+      justify-content: center;
+      color: #1A1A2E;
+      max-width: 420px;
+      text-align: center;
+      margin: 0 auto;
+      flex-direction: column;
+      gap: 8px;
+      background: #FFFFFF;
+      border: 2px solid #1A1A2E;
+      border-radius: 8px;
+      padding: 16px;
+      box-shadow: 4px 4px 0px #1A1A2E;
+      transition: background-color 0.3s ease;
+    }
+    .error { 
+      color: #FF6B6B; 
+      font-size: 14px; 
+      margin-top: 12px; 
+      font-weight: 600; 
+      text-align: left;
+    }
+    #debugConsole {
+      background: #F8F8F8; 
+      color: #1A1A2E;
+      font-family: 'Courier New', monospace; 
+      font-size: 13px;
+      padding: 12px; 
+      margin: 24px auto 0; 
+      max-width: 520px;
+      min-height: 100px; 
+      border-radius: 8px; 
+      text-align: center;
+      overflow-x: auto; 
+      white-space: pre-wrap;
+      border: 1px solid #E0E0E0;
+      display: none;
+    }
+    
+    .dev-log-btn {
+      position: fixed;
+      bottom: 20px;
+      right: 20px;
+      padding: 8px 16px;
+      border: 2px solid #1A1A2E;
+      border-radius: 8px;
+      font-size: 12px;
+      font-weight: 600;
+      cursor: pointer;
+      background: #E0E0E0;
+      color: #1A1A2E;
+      transition: all 0.3s;
+      font-family: 'Poppins', sans-serif;
+      box-shadow: 4px 4px 0px #1A1A2E;
+      z-index: 1000;
+    }
+    
+    .dev-log-btn:hover {
+      transform: translateY(-2px);
+      box-shadow: 6px 6px 0px #1A1A2E;
+    }
+    
+    .language-selector {
+      position: absolute;
+      top: 20px;
+      right: 20px;
+      display: flex;
+      gap: 8px;
+    }
+    
+    .lang-btn {
+      padding: 6px 12px;
+      border: 2px solid #1A1A2E;
+      border-radius: 6px;
+      font-size: 11px;
+      font-weight: 600;
+      cursor: pointer;
+      background: #E0E0E0;
+      color: #1A1A2E;
+      transition: all 0.3s;
+      font-family: 'Poppins', sans-serif;
+      box-shadow: 4px 4px 0px #1A1A2E;
+    }
+    
+    .lang-btn:hover {
+      transform: translateY(-2px);
+      box-shadow: 6px 6px 0px #1A1A2E;
+    }
+    
+    .lang-btn.active {
+      background: #1A1A2E;
+      color: #FFFFFF;
+    }
+    @media (max-width:600px) {
+      .controls { flex-direction: column; align-items: flex-start; }
+      input[type="text"] { min-width: 260px; }
+      .wheel { width: 300px; height: 300px; }
+      .card { margin: 10px; padding: 20px; }
+    }
+  </style>
+</head>
+<body>
+  <div class="card">
+    <div class="language-selector">
+      <button class="lang-btn active" onclick="setLanguage('en')">English</button>
+      <button class="lang-btn" onclick="setLanguage('zh')">中文</button>
+    </div>
+    <div class="title">ADHD WHAT TO DO NEXT Wheel</div>
+    <div class="divider"></div>
+    <div class="subtitle">Spin Now and Quit Procrastinating + Hating Yourself!</div>
+    <div style="color: #1A1A2E; text-align: left; margin-bottom: 24px;">
+      Let fate decide what to do next so you can save your precious ADHD brain power
+    </div>
+    
+    <div class="controls">
+      <div class="input-group">
+        <input id="taskInput" type="text" placeholder="Enter a new task..." maxlength="25">
+        <button class="btn btn-add" onclick="addTask()">➕ Add</button>
+      </div>
+      <button class="btn btn-clear" onclick="clearAllTasks()">🗑️ Clear All</button>
+    </div>
+    <div class="tasks-list" id="tasksList"></div>
+    <div class="error" id="error"></div>
+    <div class="wheel-container">
+      <div class="pointer"></div>
+      <div class="wheel" id="wheel">
+        <div class="center-dot">✨</div>
+      </div>
+    </div>
+    <button class="spin-button" id="spinBtn" onclick="spinWheel()">🎲 SPIN THE WHEEL! 🎲</button>
+    <div class="result" id="result"></div>
+    <div id="debugConsole"></div>
+    <button class="dev-log-btn" onclick="toggleDevLog()">Developer Log</button>
+  </div>
+  <script>
+  // All logic wrapped in IIFE to avoid global collisions
+  (function(window, document) {
+    const tasks = [
+      "📚 Read System Design Book",
+      "📝 Modify Resume",
+      "💻 Practice Leetcode",
+      "🚀 Build a Project (Vibe Coding)",
+      "📖 Read a book of choice",
+      "🎵 Enjoy Music",
+      "🏃‍♂️ Exercise",
+      "🧘‍♀️ Meditation time",
+      "🎨 Creative project",
+      "🧹 Do chores"
+    ];
+    let isSpinning = false;
+    let currentRotation = 0;
+
+    function generateColors(count) {
+      const base = ['#FF6B9D','#A8E6CF','#FF9AA2','#74B9FF','#FFB3BA','#6C5CE7','#FFC4A3','#BAE1FF','#FFD93D','#A29BFE','#FFFFBA','#BAFFC9'];
+      return Array.from({ length: count }, (_, i) => base[i % base.length]);
+    }
+
+    function debugLog(msg) {
+      const d = document.getElementById('debugConsole');
+      d.textContent += msg + '\n';
+      console.log(msg);
+    }
+
+    function clearDebug() {
+      document.getElementById('debugConsole').textContent = '';
+    }
+
+    function updateWheel() {
+      const wheel = document.getElementById('wheel');
+      const list = document.getElementById('tasksList');
+      const err = document.getElementById('error');
+
+      if (!tasks.length) {
+        wheel.innerHTML = '<div class="center-dot">✨</div><div style="position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);color:#6c757d;font-weight:bold;text-align:center;">🐕❓<br>Add tasks to spin!</div>';
+        list.innerHTML = '';
+        err.textContent = '';
+        return;
+      }
+
+      err.textContent = tasks.length < 2 ? 'Add at least 2 tasks to spin!' : '';
+      const colors = generateColors(tasks.length);
+      const seg = 360 / tasks.length;
+      const stops = tasks.map((_, i) => `${colors[i]} ${i*seg}deg ${(i+1)*seg}deg`).join(',');
+      wheel.style.background = `conic-gradient(${stops})`;
+
+      let labels = '<div class="center-dot">✨</div>';
+      tasks.forEach((t, i) => {
+        const ang = (i * seg) + (seg/2) - 90;
+        const x = Math.cos(ang * Math.PI/180) * 140;
+        const y = Math.sin(ang * Math.PI/180) * 140;
+        labels += `<div class="segment-text" style="transform:translate(-50%,-50%) translate(${x}px,${y}px) rotate(${ang}deg);left:50%;top:50%;">${t}</div>`;
+      });
+      wheel.innerHTML = labels;
+
+      list.innerHTML = tasks.map((t, i) =>
+        `<div class="task-item">${t}<button class="task-delete" data-index="${i}">×</button></div>`
+      ).join('');
+    }
+
+    function addTask() {
+      const inp = document.getElementById('taskInput');
+      const t = inp.value.trim();
+      if (!t) return;
+      if (tasks.length >= 12) {
+        document.getElementById('error').textContent = 'Max 12 tasks';
+        return;
+      }
+      if (tasks.indexOf(t) !== -1) {
+        document.getElementById('error').textContent = 'Task exists';
+        return;
+      }
+      tasks.push(t);
+      inp.value = '';
+      updateWheel();
+    }
+
+    function removeTask(i) {
+      tasks.splice(i, 1);
+      updateWheel();
+    }
+
+    function clearAllTasks() {
+      if (!tasks.length) {
+        document.getElementById('error').textContent = 'No tasks to clear';
+        setTimeout(() => { document.getElementById('error').textContent = ''; }, 2000);
+        return;
+      }
+      tasks.splice(0, tasks.length);
+      updateWheel();
+      document.getElementById('result').textContent = '';
+      debugLog('Cleared all tasks');
+    }
+
+    function spinWheel() {
+      if (isSpinning || tasks.length < 2) return;
+      isSpinning = true;
+      const wheel = document.getElementById('wheel');
+      const res = document.getElementById('result');
+      const btn = document.getElementById('spinBtn');
+      btn.disabled = true;
+      res.textContent = '';
+      clearDebug();
+
+      const spins = Math.floor(Math.random() * 5) + 5;
+      const randDeg = Math.random() * 360;
+      const total = currentRotation + spins * 360 + randDeg;
+      debugLog(`spins=${spins}, randDeg=${randDeg.toFixed(2)}, total=${total.toFixed(2)}`);
+      wheel.style.transform = `rotate(${total}deg)`;
+      currentRotation = total;
+
+      setTimeout(() => {
+        let rot = currentRotation % 360;
+        if (rot < 0) rot += 360;
+        const segSize = 360 / tasks.length;
+        const pointer = (-90 - rot + 360) % 360;
+        debugLog(`rot=${rot.toFixed(2)}, pointer=${pointer.toFixed(2)}`);
+
+        let best = 0, minDiff = 360;
+        tasks.forEach((_, i) => {
+          let center = ((i * segSize) + segSize/2 - 90 + 360) % 360;
+          let diff = Math.abs(pointer - center);
+          if (diff > 180) diff = 360 - diff;
+          if (diff < minDiff) { minDiff = diff; best = i; }
+        });
+        const chosen = tasks[best];
+        const colors = generateColors(tasks.length);
+        const winningColor = colors[best];
+        debugLog(`bestIndex=${best}, chosen=${chosen}`);
+        res.innerHTML = `<div>Result:</div><div>${chosen}</div>`;
+        res.style.background = winningColor;
+        btn.disabled = false;
+        isSpinning = false;
+      }, 3000);
+    }
+
+    // Event delegation for remove buttons
+    document.getElementById('tasksList').addEventListener('click', function(e) {
+      if (e.target.classList.contains('task-delete')) {
+        removeTask(parseInt(e.target.getAttribute('data-index'), 10));
+      }
+    });
+
+    document.getElementById('taskInput').addEventListener('keypress', function(e) {
+      if (e.key === 'Enter') addTask();
+    });
+
+    // Expose globals
+    window.addTask = addTask;
+    window.clearAllTasks = clearAllTasks;
+    window.spinWheel = spinWheel;
+    
+    function toggleDevLog() {
+      const console = document.getElementById('debugConsole');
+      if (console.style.display === 'none' || console.style.display === '') {
+        console.style.display = 'block';
+      } else {
+        console.style.display = 'none';
+      }
+    }
+    
+        window.toggleDevLog = toggleDevLog;
+    
+    // Translation data
+    const translations = {
+      en: {
+        title: "ADHD WHAT TO DO NEXT Wheel",
+        subtitle: "Spin Now and Quit Procrastinating + Hating Yourself!",
+        description: "Let fate decide what to do next so you can save your precious ADHD brain power",
+        addButton: "➕ Add",
+        clearButton: "🗑️ Clear All",
+        spinButton: "🎲 SPIN THE WHEEL! 🎲",
+        developerLog: "Developer Log",
+        enterTask: "Enter a new task...",
+        result: "Result:",
+        defaultTasks: [
+          "📚 Read System Design Book",
+          "📝 Modify Resume", 
+          "💻 Practice Leetcode",
+          "🚀 Build a Project (Vibe Coding)",
+          "📖 Read a book of choice",
+          "🎵 Enjoy Music",
+          "🏃‍♂️ Exercise",
+          "🧘‍♀️ Meditation time",
+          "🎨 Creative project",
+          "🧹 Do chores"
+        ]
+      },
+      zh: {
+        title: "ADHD 下一步做什么 转盘",
+        subtitle: "现在开始转转盘，停止拖延 + 停止讨厌自己！",
+        description: "让命运决定下一步做什么，这样你就可以节省宝贵的ADHD脑力",
+        addButton: "➕ 添加",
+        clearButton: "🗑️ 清空所有",
+        spinButton: "🎲 转盘开始！🎲",
+        developerLog: "开发者日志",
+        enterTask: "输入新任务...",
+        result: "结果：",
+        defaultTasks: [
+          "📚 读系统设计书",
+          "📝 修改简历",
+          "💻 练习力扣",
+          "🚀 构建项目（氛围编程）",
+          "📖 读一本自选书",
+          "🎵 享受音乐",
+          "🏃‍♂️ 运动",
+          "🧘‍♀️ 冥想时间",
+          "🎨 创意项目",
+          "🧹 做家务"
+        ]
+      }
+    };
+
+    function setLanguage(lang) {
+      const enBtn = document.querySelector('.lang-btn[onclick="setLanguage(\'en\')"]');
+      const zhBtn = document.querySelector('.lang-btn[onclick="setLanguage(\'zh\')"]');
+      
+      if (lang === 'en') {
+        enBtn.classList.add('active');
+        zhBtn.classList.remove('active');
+        updatePageLanguage('en');
+        // Update URL
+        const url = new URL(window.location);
+        url.searchParams.delete('lang');
+        window.history.replaceState({}, '', url);
+      } else if (lang === 'zh') {
+        zhBtn.classList.add('active');
+        enBtn.classList.remove('active');
+        updatePageLanguage('zh');
+        // Update URL
+        const url = new URL(window.location);
+        url.searchParams.set('lang', 'zh');
+        window.history.replaceState({}, '', url);
+      }
+    }
+    
+    function updatePageLanguage(lang) {
+      const t = translations[lang];
+      
+      // Update page text
+      document.querySelector('.title').textContent = t.title;
+      document.querySelector('.subtitle').textContent = t.subtitle;
+      document.querySelector('.card > div:nth-child(5)').textContent = t.description;
+      
+      // Update buttons
+      document.querySelector('.btn-add').textContent = t.addButton;
+      document.querySelector('.btn-clear').textContent = t.clearButton;
+      document.querySelector('.spin-button').textContent = t.spinButton;
+      document.querySelector('.dev-log-btn').textContent = t.developerLog;
+      
+      // Update input placeholder
+      document.getElementById('taskInput').placeholder = t.enterTask;
+      
+      // Update default tasks
+      tasks.length = 0;
+      t.defaultTasks.forEach(task => tasks.push(task));
+      updateWheel();
+    }
+    
+    window.setLanguage = setLanguage;
+    
+    // Initialize
+    updateWheel();
+    
+    // Check URL parameter for language
+    const urlParams = new URLSearchParams(window.location.search);
+    const langParam = urlParams.get('lang');
+    if (langParam === 'zh') {
+      setLanguage('zh');
+    }
+  })(window, document);
+  </script>
+</body>
+</html>
