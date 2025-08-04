@@ -1,0 +1,62 @@
+{
+  "name": "adhd-decision-wheel",
+  "version": "1.0.0",
+  "description": "A fun, interactive decision wheel designed specifically for people with ADHD to help them choose what to do next and stop procrastinating!",
+  "main": "index.html",
+  "scripts": {
+    "start": "open index.html || xdg-open index.html || start index.html",
+    "dev": "python -m http.server 8000 || python3 -m http.server 8000 || npx serve .",
+    "test": "echo \"No tests specified\" && exit 0",
+    "build": "echo \"No build process needed - static files only\"",
+    "deploy": "echo \"Deploy to GitHub Pages, Netlify, or other static hosting\""
+  },
+  "keywords": [
+    "adhd",
+    "decision-wheel",
+    "productivity",
+    "task-management",
+    "wheel-of-fortune",
+    "interactive",
+    "web-app",
+    "vanilla-javascript",
+    "css3",
+    "html5"
+  ],
+  "author": "Your Name",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/yc1838/adhd-decision-wheel.git"
+  },
+  "bugs": {
+    "url": "https://github.com/yc1838/adhd-decision-wheel/issues"
+  },
+  "homepage": "https://github.com/yc1838/adhd-decision-wheel#readme",
+  "files": [
+    "index.html",
+    "styles.css",
+    "script.js",
+    "sounds.js",
+    "README.md"
+  ],
+  "engines": {
+    "node": ">=14.0.0"
+  },
+  "browserslist": [
+    "> 1%",
+    "last 2 versions",
+    "not dead"
+  ],
+  "devDependencies": {},
+  "dependencies": {},
+  "peerDependencies": {},
+  "optionalDependencies": {},
+  "bundledDependencies": [],
+  "os": [],
+  "cpu": [],
+  "preferGlobal": false,
+  "private": false,
+  "publishConfig": {
+    "access": "public"
+  }
+} 
